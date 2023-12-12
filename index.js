@@ -7,7 +7,6 @@ const { Game } = require("@gathertown/gather-game-client");
 global.WebSocket = require("isomorphic-ws");
 
 
-
 // Express
 const PORT = process.env.PORT || 3000;
 // Gather
@@ -15,34 +14,43 @@ const API_KEY = process.env.API_KEY;
 const SPACE_ID = process.env.SPACE_ID;
 // Line Notify
 const LINE_NOTIFY_TOKEN = process.env.LINE_NOTIFY_TOKEN;
+// Gather Map OTH1_F(O)
+const mapX = [5, 6, 7];
+const mapY = [23, 24];
 
 const game = new Game(SPACE_ID, () => Promise.resolve({ apiKey: API_KEY }));
 game.connect();
 game.subscribeToConnection((connected) => console.log("connected?", connected));
 
-/**** the good stuff ****/
-
-// game.subscribeToEvent("playerMoves", (data, context) => {
-//   console.log(
-//     context?.player?.name ?? context.playerId,
-//     "moved in direction",
-//     data.playerMoves.direction,
-//     // "in map id",
-//     // data.playerMoves.mapId
-//   );
-//   console.log(data);
-// });
-
 game.subscribeToEvent("playerChats", (data, context) => {
-  console.log(
-    context?.player?.name ?? context.playerId,
-    "message to you :",
-    data.playerChats.contents
-  );
-
   const playerName = context?.player?.name ?? context.playerId
-  const dataQs = qs.stringify({
-    'message': `${playerName} message to you : ${data.playerChats.contents}`
+  const msg = `${playerName} message to you : ${data.playerChats.contents}`;
+
+  console.log(msg);
+  sentToLine(msg);
+});
+
+game.subscribeToEvent("playerActivelySpeaks", (data, context) => {
+  if(mapX.includes(context.player.x) && mapY.includes(context.player.y)) {
+    const msg = `${context.player.name} voice to you`;
+
+    console.log(msg);
+    sentToLine(msg);
+  }
+});
+
+game.subscribeToEvent("playerMoves", (data, context) => {
+  if(mapX.includes(data.playerMoves.x) && mapY.includes(data.playerMoves.y)) {
+    const msg = `${context.player.name} move to you`;
+
+    console.log(msg);
+    sentToLine(msg);
+  }
+});
+
+const sentToLine = (msg) => {
+  const data = qs.stringify({
+    'message': msg
   });
 
   const config = {
@@ -53,7 +61,7 @@ game.subscribeToEvent("playerChats", (data, context) => {
       'Content-Type': 'application/x-www-form-urlencoded', 
       'Authorization': LINE_NOTIFY_TOKEN
     },
-    data : dataQs
+    data : data
   };
 
   axios.request(config)
@@ -63,10 +71,7 @@ game.subscribeToEvent("playerChats", (data, context) => {
   .catch((error) => {
     console.log(error);
   });
-
-
-
-});
+};
 
 const app = express();
 app.get('/', async (req, res) => {
