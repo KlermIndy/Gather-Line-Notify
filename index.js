@@ -1,25 +1,22 @@
 const axios = require('axios');
 const qs = require('qs');
 const express = require('express');
+require('dotenv').config();
 
 const { Game } = require("@gathertown/gather-game-client");
 global.WebSocket = require("isomorphic-ws");
 
-/**** setup ****/
 
-const app = express();
+
+// Express
 const PORT = process.env.PORT || 3000;
-
 // Gather
-const API_KEY = "gBy23gweuIrpIInM";
-const SPACE_ID = "xBP58fLWr9drozxs\\ThaiBev_IT";
+const API_KEY = process.env.API_KEY;
+const SPACE_ID = process.env.SPACE_ID;
 // Line Notify
-const LINE_NOTIFY_TOKEN = "Bearer mCB4ti6jBFRqcyU6bso7ntk2jRPVWBbig66q7MXSGcU";
+const LINE_NOTIFY_TOKEN = process.env.LINE_NOTIFY_TOKEN;
 
-// what's going on here is better explained in the docs:
-// https://gathertown.notion.site/Gather-Websocket-API-bf2d5d4526db412590c3579c36141063
 const game = new Game(SPACE_ID, () => Promise.resolve({ apiKey: API_KEY }));
-// replace with your spaceId of choice ^^^^^^^^^^^
 game.connect();
 game.subscribeToConnection((connected) => console.log("connected?", connected));
 
@@ -42,13 +39,6 @@ game.subscribeToEvent("playerChats", (data, context) => {
     "message to you :",
     data.playerChats.contents
   );
-  // console.log(data);
-  // console.log(context);
-  // console.log(context.target);
-  
-
-  // data.playerChats.senderId me : y06Wp4JXwOUCUIhasFA5f0vYikx2
-
 
   const playerName = context?.player?.name ?? context.playerId
   const dataQs = qs.stringify({
@@ -78,11 +68,10 @@ game.subscribeToEvent("playerChats", (data, context) => {
 
 });
 
-
+const app = express();
 app.get('/', async (req, res) => {
   res.status(200).send("Gather Line Notify api running");
 });
-
 app.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
 })
