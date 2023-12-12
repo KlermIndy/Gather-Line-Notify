@@ -1,10 +1,14 @@
 const axios = require('axios');
 const qs = require('qs');
+const express = require('express');
 
 const { Game } = require("@gathertown/gather-game-client");
 global.WebSocket = require("isomorphic-ws");
 
 /**** setup ****/
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Gather
 const API_KEY = "gBy23gweuIrpIInM";
@@ -73,3 +77,12 @@ game.subscribeToEvent("playerChats", (data, context) => {
 
 
 });
+
+
+app.get('/', async (req, res) => {
+  res.status(200).send("Gather Line Notify api running");
+});
+
+app.listen(PORT, () => {
+  console.log(`listening on ${PORT}`);
+})
