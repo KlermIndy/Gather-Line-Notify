@@ -32,23 +32,19 @@ game.subscribeToEvent("playerChats", (data, context) => {
 
 game.subscribeToEvent("playerActivelySpeaks", (data, context) => {
   if(mapX.includes(context.player.x) && mapY.includes(context.player.y)) {
-    const msg = `${context.player.name} voice to you`;
-
-    console.log(msg);
-    sentToLine(msg);
+    sentToLine(`${context.player.name} voice to you`);
   }
 });
 
 game.subscribeToEvent("playerMoves", (data, context) => {
   if(mapX.includes(data.playerMoves.x) && mapY.includes(data.playerMoves.y)) {
-    const msg = `${context.player.name} move to you`;
-
-    console.log(msg);
-    sentToLine(msg);
+    sentToLine(`${context.player.name} move to you`);
   }
 });
 
 const sentToLine = (msg) => {
+  console.log(msg);
+
   const data = qs.stringify({
     'message': msg
   });
