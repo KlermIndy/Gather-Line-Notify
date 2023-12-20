@@ -23,11 +23,7 @@ game.connect();
 game.subscribeToConnection((connected) => console.log("connected?", connected));
 
 game.subscribeToEvent("playerChats", (data, context) => {
-  const playerName = context?.player?.name ?? context.playerId
-  const msg = `${playerName} message to you : ${data.playerChats.contents}`;
-
-  console.log(msg);
-  sentToLine(msg);
+  sentToLine(`${context.player.name} message to you : ${data.playerChats.contents}`);
 });
 
 game.subscribeToEvent("playerActivelySpeaks", (data, context) => {
